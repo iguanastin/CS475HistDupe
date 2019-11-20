@@ -1,6 +1,4 @@
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.sql.*;
 import java.util.*;
 
@@ -11,7 +9,7 @@ public class DupeSeq {
         Connection db = DriverManager.getConnection("jdbc:h2:" + args[0], "sa", "");
         Statement s = db.createStatement();
 
-        Map<Integer, double[][]> hists = new HashMap<>();
+        Map<Integer, float[][]> hists = new HashMap<>();
 
         long t = System.nanoTime();
         System.out.println("Starting query...");
@@ -21,7 +19,7 @@ public class DupeSeq {
         t = System.nanoTime();
         while (rs.next()) {
             try {
-                double[][] hist = new double[4][];
+                float[][] hist = new float[4][];
 
                 hist[0] = Utils.inputStreamAsArray(rs.getBinaryStream("hist_r"));
                 hist[1] = Utils.inputStreamAsArray(rs.getBinaryStream("hist_g"));
@@ -35,7 +33,7 @@ public class DupeSeq {
         }
 
         System.out.printf("Read: %.6fs\n", (System.nanoTime() - t) / 1000000000.0);
-        int size = hists.size();
+        long size = hists.size();
         System.out.println("n: " + size);
         System.out.println("n*n: " + (size * size));
         System.out.println();
@@ -49,18 +47,17 @@ public class DupeSeq {
         System.out.println("Starting duplicate find...");
 
         t = System.nanoTime();
-        List<SimilarPair> pairs = new ArrayList<>();
+        List<SimilarPair> pairs = new ArrayList<>(10000);
         List<Integer> ids = new ArrayList<>(hists.keySet());
         for (Integer i1 : ids) {
             if (i1 % 1000 == 0) {
                 System.out.printf("ID: %d\t\tTime: %.6fs\t\tPairs: %d\n", i1, (System.nanoTime() - t) / 1000000000.0, pairs.size());
-                //                System.out.printf("ID: %d\t\tTime: %.6fs\n", i1, (System.nanoTime() - t) / 1000000000.0);
             }
 
             for (Integer i2 : ids) {
                 if (i1.equals(i2)) continue;
 
-                double similarity = Utils.getSimilarity(hists.get(i1), hists.get(i2));
+                float similarity = Utils.getSimilarity(hists.get(i1), hists.get(i2));
                 if (similarity > Constants.CONFIDENCE) {
                     SimilarPair pair = new SimilarPair(i1, i2, similarity);
                     pairs.add(pair);

@@ -9,8 +9,8 @@ public final class Utils {
     }
 
 
-    public static double getSimilarity(double[][] h1, double[][] h2) {
-        double dr = 0, dg = 0, db = 0, da = 0;
+    public static float getSimilarity(float[][] h1, float[][] h2) {
+        float dr = 0, dg = 0, db = 0, da = 0;
 
         for (int i = 0; i < Constants.BIN_SIZE; i++) {
             dr += Math.abs(h1[0][i] - h2[0][i]);
@@ -22,15 +22,15 @@ public final class Utils {
         return 1 - (da + dr + dg + db) / 8;
     }
 
-    public static double[] inputStreamAsArray(InputStream in) throws IOException {
+    public static float[] inputStreamAsArray(InputStream in) throws IOException {
         byte[] b = new byte[Constants.BIN_SIZE * 8];
         if (in.read(b) != Constants.BIN_SIZE * 8) return null;
 
         ByteBuffer bb = ByteBuffer.wrap(b);
-        double[] result = new double[Constants.BIN_SIZE];
+        float[] result = new float[Constants.BIN_SIZE];
 
         for (int i = 0; i < Constants.BIN_SIZE; i++) {
-            result[i] = bb.getDouble();
+            result[i] = (float) bb.getDouble();
         }
 
         return result;
